@@ -18,21 +18,14 @@
     (f)))
 
 (t/deftest test-users
-  (jdbc/with-transaction [t-conn *db* {:rollback-only true}]
-    (t/is (= 1 (db/create-user!
-                t-conn
-                {:id         "1"
-                 :first_name "Sam"
-                 :last_name  "Smith"
-                 :email      "sam.smith@example.com"
-                 :pass       "pass"}
-                {})))
-    (t/is (= {:id         "1"
-              :first_name "Sam"
-              :last_name  "Smith"
-              :email      "sam.smith@example.com"
-              :pass       "pass"
-              :admin      nil
-              :last_login nil
-              :is_active  nil}
-             (db/get-user t-conn {:id "1"} {})))))
+  (jdbc/with-transaction [t-conn *db*]
+    (let [timestamp (java.time.LocalDateTime/now)
+          message   {:name "Bob"
+                     :message "Hello, world!"
+                     :timestamp timestamp}]
+      (t/is (= 1 (db/save-message! t-conn message {:connection t-conn})))
+      (let [queried-message (first (db/get-messages t-conn {}))]
+        (t/is (= (dissoc message :timestamp)
+                 (select-keys queried-message [:name :message])))
+        (t/is (= (-> message :timestamp .toLocalDate)
+                 (-> queried-message :timestamp .toLocalDate)))))))
