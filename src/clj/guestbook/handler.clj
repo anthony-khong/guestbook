@@ -1,13 +1,13 @@
 (ns guestbook.handler
   (:require
-   [guestbook.middleware :as middleware]
+   [guestbook.env :refer [defaults]]
    [guestbook.layout :refer [error-page]]
+   [guestbook.middleware :as middleware]
    [guestbook.routes.home :refer [home-routes]]
+   [mount.core :as mount]
    [reitit.ring :as ring]
    [ring.middleware.content-type :refer [wrap-content-type]]
-   [ring.middleware.webjars :refer [wrap-webjars]]
-   [guestbook.env :refer [defaults]]
-   [mount.core :as mount]))
+   [ring.middleware.webjars :refer [wrap-webjars]]))
 
 (mount/defstate init-app
   :start ((or (:init defaults) (fn [])))

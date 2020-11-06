@@ -1,11 +1,11 @@
 (ns guestbook.routes.home
   (:require
-   [guestbook.layout :as layout]
-   ;[guestbook.db.core :as db]
    [clojure.java.io :as io]
+   ;[guestbook.db.core :as db]
+   [guestbook.layout :as layout]
    [guestbook.middleware :as middleware]
-   [ring.util.response]))
    ;[ring.util.http-response :as response]))
+   [ring.util.response]))
 
 (defn home-page [request]
   (layout/render request "home.html" {:docs (-> "docs/docs.md" io/resource slurp)}))

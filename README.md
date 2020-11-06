@@ -4,6 +4,10 @@ generated using Luminus version "3.87"
 
 FIXME
 
+## TODOs
+
+- Change test framework to use Kaocha or Midje.
+
 ## Prerequisites
 
 You will need [Leiningen][1] 2.0 or above installed.

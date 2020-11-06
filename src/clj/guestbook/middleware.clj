@@ -1,15 +1,15 @@
 (ns guestbook.middleware
   (:require
-   [guestbook.env :refer [defaults]]
    [clojure.tools.logging :as log]
-   [guestbook.layout :refer [error-page]]
-   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
-   [guestbook.middleware.formats :as formats]
-   [muuntaja.middleware :refer [wrap-format wrap-params]]
     ;[guestbook.config :refer [env]]
-   [ring.middleware.flash :refer [wrap-flash]]
+   [guestbook.env :refer [defaults]]
+   [guestbook.layout :refer [error-page]]
+   [guestbook.middleware.formats :as formats]
    [immutant.web.middleware :refer [wrap-session]]
-   [ring.middleware.defaults :refer [site-defaults wrap-defaults]]))
+   [muuntaja.middleware :refer [wrap-format wrap-params]]
+   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
+   [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+   [ring.middleware.flash :refer [wrap-flash]]))
 
 (defn wrap-internal-error [handler]
   (fn [req]

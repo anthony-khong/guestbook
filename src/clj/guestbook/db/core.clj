@@ -1,10 +1,10 @@
 (ns guestbook.db.core
   (:require
-   [next.jdbc.date-time]
-   [next.jdbc.result-set]
    [conman.core :as conman]
+   [guestbook.config :refer [env]]
    [mount.core :refer [defstate]]
-   [guestbook.config :refer [env]]))
+   [next.jdbc.date-time]
+   [next.jdbc.result-set]))
 
 (defstate ^:dynamic *db*
   :start (conman/connect! {:jdbc-url (env :database-url)})
