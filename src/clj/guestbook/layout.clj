@@ -15,7 +15,7 @@
 
 (defn render
   "renders the HTML template located relative to resources/html"
-  [request template & [params]]
+  [_ template & [params]]
   (content-type
     (ok
       (parser/render-file

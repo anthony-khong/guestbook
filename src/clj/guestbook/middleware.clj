@@ -6,11 +6,11 @@
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [guestbook.middleware.formats :as formats]
     [muuntaja.middleware :refer [wrap-format wrap-params]]
-    [guestbook.config :refer [env]]
+    ;[guestbook.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
     [immutant.web.middleware :refer [wrap-session]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
-  )
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]))
+
 
 (defn wrap-internal-error [handler]
   (fn [req]
