@@ -1,3 +1,5 @@
+migrate:
+	lein run migrate
 
 kondo:
 	clj-kondo --lint src test --cache false
