@@ -11,4 +11,3 @@ ci: kondo fmt ancient
 
 migrate:
 	lein run migrate
-
