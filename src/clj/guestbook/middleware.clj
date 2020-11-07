@@ -1,5 +1,9 @@
 (ns guestbook.middleware
   (:require
+   [buddy.auth :refer [authenticated?]]
+   [buddy.auth.accessrules :refer [restrict wrap-access-rules]]
+   [buddy.auth.backends.session :refer [session-backend]]
+   [buddy.auth.middleware :refer [wrap-authentication]]
    [clojure.tools.logging :as log]
     ;[guestbook.config :refer [env]]
    [guestbook.env :refer [defaults]]
@@ -10,6 +14,19 @@
    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
    [ring.middleware.flash :refer [wrap-flash]]))
+
+(def rules
+  [{:uri "/restricted"
+    :handle authenticated?}])
+
+(defn on-error [request _]
+  {:status  403
+   :headers {"Content-Type" "text/plain"}
+   :body    (str "Access to " (:uri request) " is not authorized")})
+
+(defn wrap-restricted [handler]
+  (restrict handler {:handler authenticated?
+                     :on-error on-error}))
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -39,6 +56,8 @@
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-flash
+      (wrap-access-rules {:rules rules :on-error on-error})
+      (wrap-authentication (session-backend))
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
        (-> site-defaults

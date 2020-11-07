@@ -37,7 +37,8 @@
            (select-keys flash [:name :message :errors]))))
 
 (defn about-page [request]
-  (layout/render request "about.html"))
+  ;(layout/render request "about.html")
+  {:status 200 :body (sort (keys request))})
 
 (defn home-routes []
   [""
@@ -46,4 +47,3 @@
    ["/" {:get home-page
          :post save-message!}]
    ["/about" {:get about-page}]])
-

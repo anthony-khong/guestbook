@@ -3,7 +3,11 @@
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
 
-  :dependencies [[cheshire "5.10.0"]
+  :dependencies [[buddy/buddy-auth "2.2.0"]
+                 [buddy/buddy-core "1.8.0"]
+                 [buddy/buddy-hashers "1.6.0"]
+                 [buddy/buddy-sign "3.2.0"]
+                 [cheshire "5.10.0"]
                  [clojure.java-time "0.3.2"]
                  [com.fasterxml.jackson.core/jackson-core "2.11.3"]
                  [com.fasterxml.jackson.core/jackson-databind "2.11.3"]
