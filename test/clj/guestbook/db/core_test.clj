@@ -1,14 +1,14 @@
 (ns guestbook.db.core-test
   (:require
-   [clojure.test :as t]
-   [guestbook.config :refer [env]]
    [guestbook.db.core :refer [*db*] :as db]
    [java-time.pre-java8]
    [luminus-migrations.core :as migrations]
-   [mount.core :as mount]
-   [next.jdbc :as jdbc]))
+   [clojure.test :refer :all]
+   [next.jdbc :as jdbc]
+   [guestbook.config :refer [env]]
+   [mount.core :as mount]))
 
-(t/use-fixtures
+(use-fixtures
   :once
   (fn [f]
     (mount/start
@@ -17,15 +17,22 @@
     (migrations/migrate ["migrate"] (select-keys env [:database-url]))
     (f)))
 
-(t/deftest test-users
-  (jdbc/with-transaction [t-conn *db*]
-    (let [timestamp (java.time.LocalDateTime/now)
-          message   {:name "Bob"
-                     :message "Hello, world!"
-                     :timestamp timestamp}]
-      (t/is (= 1 (db/save-message! t-conn message {:connection t-conn})))
-      (let [queried-message (first (db/get-messages t-conn {}))]
-        (t/is (= (dissoc message :timestamp)
-                 (select-keys queried-message [:name :message])))
-        (t/is (= (-> message :timestamp .toLocalDate)
-                 (-> queried-message :timestamp .toLocalDate)))))))
+(deftest test-users
+  (jdbc/with-transaction [t-conn *db* {:rollback-only true}]
+    (is (= 1 (db/create-user!
+              t-conn
+              {:id         "1"
+               :first_name "Sam"
+               :last_name  "Smith"
+               :email      "sam.smith@example.com"
+               :pass       "pass"}
+              {})))
+    (is (= {:id         "1"
+            :first_name "Sam"
+            :last_name  "Smith"
+            :email      "sam.smith@example.com"
+            :pass       "pass"
+            :admin      nil
+            :last_login nil
+            :is_active  nil}
+           (db/get-user t-conn {:id "1"} {})))))

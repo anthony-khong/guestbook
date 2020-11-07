@@ -1,6 +1,0 @@
-{:lint-as
- {mount.core/defstate clojure.core/def
-  mount.core/start clojure.core/declare
-  mount.core/start-without clojure.core/declare
-  mount.core/stop-except clojure.core/declare
-  clojure.java.jdbc/with-db-transaction clojure.core/let}}

@@ -1,11 +1,10 @@
-.clj-kondo/.cache/*
-*.db
-
 /target
 /lib
 /classes
 /checkouts
 pom.xml
+dev-config.edn
+test-config.edn
 *.jar
 *.class
 /.lein-*

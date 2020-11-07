@@ -1,15 +1,15 @@
 (ns user
   "Userspace functions you can run by default in your local REPL."
   (:require
-   [clojure.pprint]
-   [clojure.spec.alpha :as s]
-   [conman.core :as conman]
-   [expound.alpha :as expound]
    [guestbook.config :refer [env]]
-   [guestbook.core]
-   [guestbook.db.core]
-   [luminus-migrations.core :as migrations]
-   [mount.core :as mount]))
+    [clojure.pprint]
+    [clojure.spec.alpha :as s]
+    [expound.alpha :as expound]
+    [mount.core :as mount]
+    [guestbook.core :refer [start-app]]
+    [guestbook.db.core]
+    [conman.core :as conman]
+    [luminus-migrations.core :as migrations]))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
 
@@ -60,5 +60,4 @@
   [name]
   (migrations/create name (select-keys env [:database-url])))
 
-(comment
-  (start))
+

@@ -1,32 +1,15 @@
 (ns guestbook.middleware
   (:require
-   [buddy.auth :refer [authenticated?]]
-   [buddy.auth.accessrules :refer [restrict wrap-access-rules]]
-   [buddy.auth.backends.session :refer [session-backend]]
-   [buddy.auth.middleware :refer [wrap-authentication]]
-   [clojure.tools.logging :as log]
-    ;[guestbook.config :refer [env]]
-   [guestbook.env :refer [defaults]]
-   [guestbook.layout :refer [error-page]]
-   [guestbook.middleware.formats :as formats]
-   [immutant.web.middleware :refer [wrap-session]]
-   [muuntaja.middleware :refer [wrap-format wrap-params]]
-   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
-   [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-   [ring.middleware.flash :refer [wrap-flash]]))
-
-(def rules
-  [{:uri "/restricted"
-    :handle authenticated?}])
-
-(defn on-error [request _]
-  {:status  403
-   :headers {"Content-Type" "text/plain"}
-   :body    (str "Access to " (:uri request) " is not authorized")})
-
-(defn wrap-restricted [handler]
-  (restrict handler {:handler authenticated?
-                     :on-error on-error}))
+    [guestbook.env :refer [defaults]]
+    [clojure.tools.logging :as log]
+    [guestbook.layout :refer [error-page]]
+    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
+    [guestbook.middleware.formats :as formats]
+    [muuntaja.middleware :refer [wrap-format wrap-params]]
+    [guestbook.config :refer [env]]
+    [ring-ttl-session.core :refer [ttl-memory-store]]
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
+  )
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -40,11 +23,12 @@
 
 (defn wrap-csrf [handler]
   (wrap-anti-forgery
-   handler
-   {:error-response
-    (error-page
-     {:status 403
-      :title "Invalid anti-forgery token"})}))
+    handler
+    {:error-response
+     (error-page
+       {:status 403
+        :title "Invalid anti-forgery token"})}))
+
 
 (defn wrap-formats [handler]
   (let [wrapped (-> handler wrap-params (wrap-format formats/instance))]
@@ -55,12 +39,8 @@
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
-      wrap-flash
-      (wrap-access-rules {:rules rules :on-error on-error})
-      (wrap-authentication (session-backend))
-      (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
-       (-> site-defaults
-           (assoc-in [:security :anti-forgery] false)
-           (dissoc :session)))
+        (-> site-defaults
+            (assoc-in [:security :anti-forgery] false)
+            (assoc-in  [:session :store] (ttl-memory-store (* 60 30)))))
       wrap-internal-error))

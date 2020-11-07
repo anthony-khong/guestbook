@@ -1,6 +1,3 @@
-migrate:
-	lein run migrate
-
 kondo:
 	clj-kondo --lint src test --cache false
 
@@ -11,3 +8,7 @@ ancient:
 	lein ancient
 
 ci: kondo fmt ancient
+
+migrate:
+	lein run migrate
+
