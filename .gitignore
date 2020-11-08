@@ -1,3 +1,5 @@
+.clj-kondo/.cache
+
 /target
 /lib
 /classes
