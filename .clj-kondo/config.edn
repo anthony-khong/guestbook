@@ -1,4 +1,5 @@
-{:lint-as
+{:skip-comments true
+ :lint-as
  {mount.core/defstate clojure.core/def
   mount.core/start clojure.core/declare
   mount.core/start-without clojure.core/declare

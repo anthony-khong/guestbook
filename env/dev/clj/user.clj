@@ -60,4 +60,10 @@
   [name]
   (migrations/create name (select-keys env [:database-url])))
 
-
+(comment
+  (start)
+  (restart)
+  (create-migration "guestbook")
+  (migrate)
+  (reset-db)
+  (rollback))

@@ -28,3 +28,9 @@
     (.toLocalTime v))
   (read-column-by-index [^java.sql.Time v _2 _3]
     (.toLocalTime v)))
+
+(comment
+  (conman/bind-connection *db* "sql/queries.sql")
+  (get-messages)
+  (save-message! {:name "Bob" :message "Hello, world!"})
+  (get-messages))
