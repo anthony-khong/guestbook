@@ -27,7 +27,8 @@
   (http/start
    (-> env
        (assoc  :handler (handler/app))
-       (update :port #(or (-> env :options :port) %))))
+       (update :port #(or (-> env :options :port) %))
+       (select-keys [:handler :port :host])))
   :stop
   (http/stop http-server))
 

@@ -13,8 +13,7 @@
                  [cprop "0.1.17"]
                  [expound "0.8.6"]
                  [funcool/struct "1.4.0"]
-                 [luminus-aleph "0.1.6"]
-                 ;[luminus-http-kit "0.1.9"] FIXME
+                 [luminus-http-kit "0.1.9"]
                  [luminus-migrations "0.7.0"]
                  [luminus-transit "0.1.2"]
                  [luminus/ring-ttl-session "0.3.3"]
