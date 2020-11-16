@@ -9,7 +9,7 @@
 (defn home-page [{:keys [flash] :as request}]
   (layout/render
    request
-   "home.html"
+   "cljs_home.html"
    (merge {:messages (db/get-messages)}
           (select-keys flash [:name :message :errors]))))
 
