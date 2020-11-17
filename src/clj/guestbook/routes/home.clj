@@ -2,9 +2,7 @@
   (:require
    [guestbook.db.core :as db]
    [guestbook.layout :as layout]
-   ;[guestbook.messages :as messages]
    [guestbook.middleware :as middleware]))
-   ;[ring.util.http-response :as response]))
 
 (defn home-page [{:keys [flash] :as request}]
   (layout/render
