@@ -7,6 +7,7 @@
                  [cheshire "5.10.0"]
                  [cljs-ajax "0.8.1"]
                  [clojure.java-time "0.3.2"]
+                 [com.taoensso/sente "1.16.0"]
                  [com.fasterxml.jackson.core/jackson-core "2.11.3"]
                  [com.fasterxml.jackson.core/jackson-databind "2.11.3"]
                  [com.h2database/h2 "1.4.200"]

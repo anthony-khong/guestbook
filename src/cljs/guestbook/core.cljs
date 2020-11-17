@@ -3,19 +3,42 @@
   [ajax.core :as ajax]
   [clojure.string :as string]
   [guestbook.validation :as validation]
-  [reagent.core :as r]
+  [guestbook.websockets :as websockets]
   [re-frame.core :as rf]
   [reagent.dom :as dom]))
 
 (rf/reg-event-fx
   :app/initialize
   (fn [_ _]
-    {:db {:messages/loading? true}}))
+    {:db {:messages/loading? true}
+     :dispatch [:messages/load]}))
+
+(rf/reg-event-db
+  :messages/load
+  (fn [{:keys [db]} _]
+    (ajax/GET
+     "api/messages"
+     {:headers {"Accept" "application/transit+json"}
+      :handler #(rf/dispatch [:messages/set (:messages %)])})
+    {:db (assoc db :messages/loading? true)}))
 
 (rf/reg-sub
   :messages/loading?
   (fn [db _]
    (:messages/loading? db)))
+
+(rf/reg-event-fx
+  :message/send!
+  (fn [{:keys [db]} [_ fields]]
+    (websockets/send-message!  fields)
+    {:db (dissoc db :form/server-errors)}))
+
+(defn handle-response! [response]
+  (if-let [errors (:errors response)]
+    (rf/dispatch [:form/set-server-errors errors])
+    (do
+      (rf/dispatch [:message/add response])
+      (rf/dispatch [:form/clear-fields response]))))
 
 (rf/reg-event-db
   :messages/set
@@ -89,21 +112,21 @@
   (fn [errors [_ id]]
     (get errors id)))
 
-(rf/reg-event-fx
-  :message/send!
-  (fn [{:keys [db]} [_ fields]]
-    (ajax/POST
-      "api/message"
-      {:format :json
-       :headers
-       {"Accept" "application/transit+json"
-        "x-csrf-token" (.-value (.getElementById js/document "token"))}
-       :params fields
-       :handler
-       #(rf/dispatch [:message/add (-> fields (assoc :timestamp (js/Date.)))])
-       :error-handler
-       #(rf/dispatch [:form/set-server-errors (get-in % [:response :errors])])})
-    {:db (dissoc db :form/server-errors)}))
+;(rf/reg-event-fx
+  ;:message/send!
+  ;(fn [{:keys [db]} [_ fields]]
+    ;(ajax/POST
+      ;"api/message"
+      ;{:format :json
+       ;:headers
+       ;{"Accept" "application/transit+json"
+        ;"x-csrf-token" (.-value (.getElementById js/document "token"))}
+       ;:params fields
+       ;:handler
+       ;#(rf/dispatch [:message/add (-> fields (assoc :timestamp (js/Date.)))])
+       ;:error-handler
+       ;#(rf/dispatch [:form/set-server-errors (get-in % [:response :errors])])})
+    ;{:db (dissoc db :form/server-errors)}))
 
 (defn get-messages []
   (ajax/GET
@@ -148,6 +171,15 @@
   (when-let [error @(rf/subscribe [:form/error id])]
     [:div.notification.is-danger (string/join error)]))
 
+(defn reload-messages-button []
+  (let [loading? (rf/subscribe [:messages/loading?])]
+    [:button.button.is-info.is-fullwidth
+     {:on-click #(rf/dispatch [:messages/load])
+      :disabled @loading?}
+     (if @loading?
+       "Loading Messages"
+       "Refresh Messages")]))
+
 (defn message-form []
   (fn []
     [:div
@@ -163,15 +195,11 @@
         :name :name
         :on-change #(rf/dispatch [:form/set-field :name (-> % .-target .-value)])
         :value @(rf/subscribe [:form/field :name])}]]
-        ;:on-change #(swap! fields assoc :name (-> % .-target .-value))
-        ;:value (:name @fields)}]]
      [:div.field
       [:label.label {:for :message} "Message"]
       [errors-component :message]
       [:textarea.textarea
        {:name :message
-        ;:value (:message @fields)
-        ;:on-change #(swap! fields assoc :message (-> % .-target .-value))
         :on-change #(rf/dispatch [:form/set-field :message (-> % .-target .-value)])
         :value @(rf/subscribe [:form/field :message])}]]
      [:input.button.is-primary
@@ -190,6 +218,8 @@
           [:h3 "Messages"]
           [message-list messages]]
          [:div.columns>div.column
+          [reload-messages-button]]
+         [:div.columns>div.column
           [:h3 "New Message"]
           [message-form]]]))))
 
@@ -202,6 +232,8 @@
 (defn init! []
   (.log js/console "Initialising app...")
   (rf/dispatch [:app/initialize])
-  (get-messages)
+  (websockets/connect!
+   (str "ws://" (.-host js/location) "/ws")
+   handle-response!)
   (mount-components)
   (.log js/console "guestbook.core evaluated!"))
