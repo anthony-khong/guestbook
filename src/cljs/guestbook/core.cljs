@@ -1,37 +1,37 @@
 (ns guestbook.core
- (:require
-  [ajax.core :as ajax]
-  [clojure.string :as string]
-  [guestbook.validation :as validation]
-  [guestbook.websockets :as websockets]
-  [re-frame.core :as rf]
-  [reagent.dom :as dom]))
+  (:require
+   [ajax.core :as ajax]
+   [clojure.string :as string]
+   [guestbook.validation :as validation]
+   [guestbook.websockets :as websockets]
+   [re-frame.core :as rf]
+   [reagent.dom :as dom]))
 
 (rf/reg-event-fx
-  :app/initialize
-  (fn [_ _]
-    {:db {:messages/loading? true}
-     :dispatch [:messages/load]}))
+ :app/initialize
+ (fn [_ _]
+   {:db {:messages/loading? true}
+    :dispatch [:messages/load]}))
 
 (rf/reg-event-db
-  :messages/load
-  (fn [{:keys [db]} _]
-    (ajax/GET
+ :messages/load
+ (fn [{:keys [db]} _]
+   (ajax/GET
      "api/messages"
      {:headers {"Accept" "application/transit+json"}
       :handler #(rf/dispatch [:messages/set (:messages %)])})
-    {:db (assoc db :messages/loading? true)}))
+   {:db (assoc db :messages/loading? true)}))
 
 (rf/reg-sub
-  :messages/loading?
-  (fn [db _]
+ :messages/loading?
+ (fn [db _]
    (:messages/loading? db)))
 
 (rf/reg-event-fx
-  :message/send!
-  (fn [{:keys [db]} [_ fields]]
-    (websockets/send-message!  fields)
-    {:db (dissoc db :form/server-errors)}))
+ :message/send!
+ (fn [{:keys [db]} [_ fields]]
+   (websockets/send-message!  fields)
+   {:db (dissoc db :form/server-errors)}))
 
 (defn handle-response! [response]
   (if-let [errors (:errors response)]
@@ -41,76 +41,76 @@
       (rf/dispatch [:form/clear-fields response]))))
 
 (rf/reg-event-db
-  :messages/set
-  (fn [db [_ messages]]
-    (-> db
-        (assoc :messages/loading? false
-               :messages/list messages))))
+ :messages/set
+ (fn [db [_ messages]]
+   (-> db
+       (assoc :messages/loading? false
+              :messages/list messages))))
 
 (rf/reg-sub
-  :messages/list
-  (fn [db _]
-    (:messages/list db [])))
+ :messages/list
+ (fn [db _]
+   (:messages/list db [])))
 
 (rf/reg-event-db
-  :message/add
-  (fn [db [_ message]]
-    (update db :messages/list conj message)))
+ :message/add
+ (fn [db [_ message]]
+   (update db :messages/list conj message)))
 
 (rf/reg-event-db
-  :form/set-field
-  [(rf/path :form/fields)]
-  (fn [fields [_ id value]]
-    (assoc fields id value)))
+ :form/set-field
+ [(rf/path :form/fields)]
+ (fn [fields [_ id value]]
+   (assoc fields id value)))
 
 (rf/reg-event-db
-  :form/clear-fields
-  [(rf/path :form/fields)]
-  (fn [_ _] {}))
+ :form/clear-fields
+ [(rf/path :form/fields)]
+ (fn [_ _] {}))
 
 (rf/reg-sub
-  :form/fields
-  (fn [db _] (:form/fields db)))
+ :form/fields
+ (fn [db _] (:form/fields db)))
 
 (rf/reg-sub
-  :form/field
-  :<- [:form/fields]
-  (fn [fields [_ id]]
-    (get fields id)))
+ :form/field
+ :<- [:form/fields]
+ (fn [fields [_ id]]
+   (get fields id)))
 
 (rf/reg-event-db
-  :form/set-server-errors
-  [(rf/path :form/server-errors)]
-  (fn [_ [_ errors]] errors))
+ :form/set-server-errors
+ [(rf/path :form/server-errors)]
+ (fn [_ [_ errors]] errors))
 
 (rf/reg-sub
-  :form/server-errors
-  (fn [db _] (:form/server-errors db)))
+ :form/server-errors
+ (fn [db _] (:form/server-errors db)))
 
 ;;Validation errors are reactively computed
 (rf/reg-sub
-  :form/validation-errors
-  :<- [:form/fields]
-  (fn [fields _]
-    (validation/validate-message fields)))
+ :form/validation-errors
+ :<- [:form/fields]
+ (fn [fields _]
+   (validation/validate-message fields)))
 
 (rf/reg-sub
-  :form/validation-errors?
-  :<- [:form/validation-errors]
-  (fn [errors _] (seq errors)))
+ :form/validation-errors?
+ :<- [:form/validation-errors]
+ (fn [errors _] (seq errors)))
 
 (rf/reg-sub
-  :form/errors
-  :<- [:form/validation-errors]
-  :<- [:form/server-errors]
-  (fn [[validation server] _]
-     (merge validation server)))
+ :form/errors
+ :<- [:form/validation-errors]
+ :<- [:form/server-errors]
+ (fn [[validation server] _]
+   (merge validation server)))
 
 (rf/reg-sub
-  :form/error
-  :<- [:form/errors]
-  (fn [errors [_ id]]
-    (get errors id)))
+ :form/error
+ :<- [:form/errors]
+ (fn [errors [_ id]]
+   (get errors id)))
 
 ;(rf/reg-event-fx
   ;:message/send!
@@ -130,9 +130,9 @@
 
 (defn get-messages []
   (ajax/GET
-   "api/messages"
-   {:headers {"Accept" "application/transit+json"}
-    :handler #(rf/dispatch [:messages/set (:messages %)])}))
+    "api/messages"
+    {:headers {"Accept" "application/transit+json"}
+     :handler #(rf/dispatch [:messages/set (:messages %)])}))
 
 (defn message-list [messages]
   (println messages)

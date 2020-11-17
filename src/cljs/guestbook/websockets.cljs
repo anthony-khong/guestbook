@@ -8,8 +8,8 @@
     (do
       (.log js/console "Connected!")
       (set!
-        (.-onmessage chan)
-        #(->> % .-data edn/read-string receive-handler))
+       (.-onmessage chan)
+       #(->> % .-data edn/read-string receive-handler))
       (reset! channel chan))
     (throw (ex-info "Websocket connection failed!" {:url url}))))
 

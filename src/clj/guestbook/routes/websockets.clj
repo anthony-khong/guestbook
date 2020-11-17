@@ -1,9 +1,9 @@
 (ns guestbook.routes.websockets
   (:require
-    [clojure.tools.logging :as logging]
-    [org.httpkit.server :as http-kit]
-    [clojure.edn :as edn]
-    [guestbook.messages :as messages]))
+   [clojure.tools.logging :as logging]
+   [org.httpkit.server :as http-kit]
+   [clojure.edn :as edn]
+   [guestbook.messages :as messages]))
 
 (defonce channels
   (atom #{}))

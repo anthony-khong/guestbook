@@ -24,7 +24,7 @@
           :validation
           (response/bad-request {:errors errors})
           (response/internal-server-error
-            {:errors {:server-error ["Failed to save message!"]}}))))))
+           {:errors {:server-error ["Failed to save message!"]}}))))))
 
 (defn service-routes []
   ["/api"

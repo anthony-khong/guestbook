@@ -16,7 +16,7 @@
                  [expound "0.8.6"]
                  [funcool/struct "1.4.0"]
                  [luminus-http-kit "0.1.9"]
-                 [luminus-migrations "0.7.0"]
+                 [luminus-migrations "0.7.1"]
                  [luminus-transit "0.1.2"]
                  [luminus/ring-ttl-session "0.3.3"]
                  [markdown-clj "1.10.5"]
@@ -61,7 +61,7 @@
    :test          [:project/dev :project/test :profiles/test]
 
    :project/dev  {:jvm-opts ["-Dconf=dev-config.edn"]
-                  :dependencies [[binaryage/devtools "0.9.10"]
+                  :dependencies [[binaryage/devtools "1.0.2"]
                                  [pjstadig/humane-test-output "0.10.0"]
                                  [prone "2020-01-17"]
                                  [ring/ring-devel "1.8.2"]

@@ -1,7 +1,7 @@
 (ns guestbook.messages
   (:require
-    [guestbook.db.core :as db]
-    [guestbook.validation :as validation]))
+   [guestbook.db.core :as db]
+   [guestbook.validation :as validation]))
 
 (defn message-list []
   {:messages (vec (db/get-messages))})
