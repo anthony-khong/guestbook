@@ -63,7 +63,9 @@
        :handler
        #(do
           (.log js/console (str "response:" %))
-          (rf/dispatch [:message/add (assoc @fields :timestamp (js/Date.))])
+          (rf/dispatch [:message/add (-> @fields
+                                         (assoc :timestamp (js/Date.))
+                                         (update :name str "[CLIENT] "))])
           (reset! fields nil)
           (reset! errors nil))
        :error-handler
@@ -75,7 +77,7 @@
   (when-let [error (id @errors)]
     [:div.notification.is-danger (string/join error)]))
 
-(defn message-form [messages]
+(defn message-form []
   (let [fields (r/atom {})
         errors (r/atom nil)]
     (fn []
@@ -106,8 +108,8 @@
 
 (defn home []
   (let [messages (rf/subscribe [:messages/list])]
-    (rf/dispatch [:app/initialize])
-    (get-messages)
+    ;(rf/dispatch [:app/initialize])
+    ;(get-messages)
     (fn []
       (if @(rf/subscribe [:messages/loading?])
         [:div>div.row>div.span12>h3 "Loading Messages..."]
@@ -117,9 +119,22 @@
           [message-list messages]]
          [:div.columns>div.column
           [:h3 "New Message"]
-          [message-form messages]]]))))
+          [message-form]]]))))
 
-(dom/render
-  [home]
-  (.getElementById js/document "content"))
+(defn ^:dev/after-load mount-components []
+  (rf/clear-subscription-cache!)
+  (.log js/console "Mounting components...")
+  (dom/render [#'home] (.getElementById js/document "content"))
+  (.log js/console "Components mounted!"))
+
+(defn init! []
+  (.log js/console "Initialising app...")
+  (rf/dispatch [:app/initialize])
+  (get-messages)
+  (mount-components)
+  (.log js/console "guestbook.core evaluated!"))
+
+;(dom/render
+  ;[home]
+  ;(.getElementById js/document "content"))
 

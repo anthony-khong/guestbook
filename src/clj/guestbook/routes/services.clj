@@ -57,8 +57,7 @@
      {:responses
       {200 {:body {:messages [{:id pos-int?
                                :name string?
-                               :message string?
-                               :timestamp inst?}]}}}
+                               :message string?}]}}}
       :handler
       (fn [_] (response/ok (messages/message-list)))}}]
    ["/message"
