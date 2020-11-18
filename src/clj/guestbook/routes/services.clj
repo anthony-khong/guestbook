@@ -1,5 +1,6 @@
 (ns guestbook.routes.services
   (:require
+   [guestbook.auth :as auth]
    [guestbook.messages :as messages]
    ;[guestbook.middleware :as middleware]
    [guestbook.middleware.formats :as formats]
@@ -11,7 +12,8 @@
    [reitit.ring.middleware.parameters :as parameters]
    [reitit.swagger :as swagger]
    [reitit.swagger-ui :as swagger-ui]
-   [ring.util.http-response :as response]))
+   [ring.util.http-response :as response]
+   [spec-tools.data-spec :as data-spec]))
 
 (defn save-message! [request]
   (try
@@ -52,6 +54,47 @@
      {:get (swagger/create-swagger-handler)}]
     ["/swagger-ui*"
      {:get (swagger-ui/create-swagger-ui-handler {:url "/api/swagger.json"})}]]
+   ["/login"
+    {:post {:parameters {:body {:login string? :password string?}}
+            :responses {200 {:body {:identity {:login string?}}}
+                        401 {:body {:message string?}}}
+            :handler
+            (fn [{{{:keys [login password]} :body} :parameters
+                  session                          :session}]
+              (if-some [user (auth/authenticate-user login password)]
+                (-> (response/ok {:identity user})
+                    (assoc :session (assoc session :identity user)))
+                (response/unauthorized
+                  {:message "Incorrect login or password"})))}}]
+   ["/logout"
+    {:post {:responses {200 {:body {:message string?}}}
+            :handler (fn [_] (response/ok {:message "Logout successful."}))}}]
+   ["/register"
+    {:post {:parameters {:body {:login string? :password string? :confirm string?}}
+            :responses {200 {:body {:message string?}}
+                        400 {:body {:message string?}}
+                        409 {:body {:message string?}}}
+            :handler
+            (fn [{{{:keys [login password confirm]} :body} :parameters}]
+              (if-not (= password confirm)
+                (response/bad-request {:message "Password and confirm do not match."})
+                (try
+                  (auth/create-user! login password)
+                  (response/ok {:message "User registration successful. Please log in."})
+                  (catch clojure.lang.ExceptionInfo e
+                    (if (= (:guestbook/error-id (ex-data e))
+                           ::auth/dubplicate-user)
+                      (response/conflict
+                        {:message "Registration failed! User login alread exists!"})
+                      (throw e))))))}}]
+   ["/session"
+    {:get {:responses {200 {:body {:session {:identity (data-spec/maybe {:login string?})}}}}
+           :handler
+           (fn [{{:keys [identity]} :session}]
+             (response/ok {:session
+                           {:identity
+                            (not-empty
+                              (select-keys identity [:login :created-at]))}}))}}]
    ["/messages"
     {:get
      {:responses

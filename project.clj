@@ -3,14 +3,14 @@
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
 
-  :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
+  :dependencies [[buddy "2.0.0"]
+                 [ch.qos.logback/logback-classic "1.2.3"]
                  [cheshire "5.10.0"]
                  [cljs-ajax "0.8.1"]
                  [clojure.java-time "0.3.2"]
                  [com.taoensso/sente "1.16.0"]
                  [com.fasterxml.jackson.core/jackson-core "2.11.3"]
                  [com.fasterxml.jackson.core/jackson-databind "2.11.3"]
-                 [com.h2database/h2 "1.4.200"]
                  [conman "0.9.0"]
                  [cprop "0.1.17"]
                  [expound "0.8.6"]
@@ -30,6 +30,7 @@
                  [org.clojure/clojurescript "1.10.773"]
                  [org.clojure/tools.cli "1.0.194"]
                  [org.clojure/tools.logging "1.1.0"]
+                 [org.postgresql/postgresql "42.2.18"]
                  [org.webjars.npm/bulma "0.9.1"]
                  [org.webjars.npm/material-icons "0.3.1"]
                  [org.webjars/webjars-locator "0.40"]

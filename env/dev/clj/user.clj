@@ -66,4 +66,6 @@
   (create-migration "guestbook")
   (migrate)
   (reset-db)
-  (rollback))
+  (rollback)
+
+  (require '[guestbook.db.core :as db]))
