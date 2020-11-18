@@ -5,7 +5,8 @@
    [guestbook.validation :as validation]
    [guestbook.websockets :as websockets]
    [re-frame.core :as rf]
-   [reagent.dom :as dom]))
+   [reagent.dom :as dom]
+   [mount.core :as mount]))
 
 (rf/reg-event-fx
  :app/initialize
@@ -28,10 +29,23 @@
    (:messages/loading? db)))
 
 (rf/reg-event-fx
- :message/send!
- (fn [{:keys [db]} [_ fields]]
-   (websockets/send-message!  fields)
-   {:db (dissoc db :form/server-errors)}))
+  :message/send!
+  (fn [{:keys [db]} [_ fields]]
+    (websockets/send! [:message/create! fields])
+    {:db (dissoc db :form/server-errors)}))
+
+(rf/reg-event-fx
+  :message/send!
+  (fn [{:keys [db]} [_ fields]]
+    (websockets/send!
+      [:message/create! fields]
+      10000
+      (fn [{:keys [success errors] :as response}]
+        (.log js/console "Called Back: " (pr-str response))
+        (if success
+          (rf/dispatch [:form/clear-fields])
+          (rf/dispatch [:form/set-server-errors errors]))))
+    {:db (dissoc db :form/server-errors)}))
 
 (defn handle-response! [response]
   (if-let [errors (:errors response)]
@@ -231,9 +245,7 @@
 
 (defn init! []
   (.log js/console "Initialising app...")
+  (mount/start)
   (rf/dispatch [:app/initialize])
-  (websockets/connect!
-   (str "ws://" (.-host js/location) "/ws")
-   handle-response!)
   (mount-components)
   (.log js/console "guestbook.core evaluated!"))
