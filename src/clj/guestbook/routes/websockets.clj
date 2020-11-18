@@ -37,7 +37,7 @@
    :id id})
 
 (defmethod handle-message :message/create!
-  [{:keys [?data uid] :as msg}]
+  [{:keys [?data _]}]
   (let [response (try
                    (messages/save-message! ?data)
                    (assoc ?data :timestamp (java.util.Date.))
