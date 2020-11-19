@@ -185,12 +185,17 @@
 (defn message-list [messages]
   (println messages)
   [:ul.messages
-   (for [{:keys [timestamp message name]} @messages]
+   (for [{:keys [timestamp message name author]} @messages]
      ^{:key timestamp}
      [:li
       [:time (.toLocaleString timestamp)]
       [:p message]
-      [:p " - " name]])])
+      [:p " - " name
+       " <"
+       (if author
+         (str "@" author)
+         [:span.is-italic "account not found"])
+       ">"]])])
 
 (defn send-message! [fields errors]
   (if-let [validation-errors (validation/validate-message @fields)]

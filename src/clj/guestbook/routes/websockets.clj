@@ -39,7 +39,7 @@
 (defmethod handle-message :message/create!
   [{:keys [?data _]}]
   (let [response (try
-                   (messages/save-message! ?data)
+                   (messages/save-message! {:login "abc"} ?data)
                    (assoc ?data :timestamp (java.util.Date.))
                    (catch Exception e
                      (let [{id :guestbook/error-id

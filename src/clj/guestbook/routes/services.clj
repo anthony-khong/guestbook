@@ -15,10 +15,16 @@
    [ring.util.http-response :as response]
    [spec-tools.data-spec :as data-spec]))
 
+(require '[clojure.pprint :refer [pprint]])
+
 (defn save-message! [request]
+  (println (:session request))
   (try
-    (messages/save-message! (:body-params request))
-    (response/ok {:status :ok})
+    (->> (messages/save-message!
+          (-> request :session :identity)
+          (:body-params request))
+         (assoc {:status :ok} :post)
+         response/ok)
     (catch Exception ex
       (let [{id     :guestbook/error-id
              errors :errors} (ex-data ex)]
@@ -59,13 +65,15 @@
             :responses {200 {:body {:identity {:login string?}}}
                         401 {:body {:message string?}}}
             :handler
-            (fn [{{{:keys [login password]} :body} :parameters
-                  session                          :session}]
-              (if-some [user (auth/authenticate-user login password)]
-                (-> (response/ok {:identity user})
-                    (assoc :session (assoc session :identity user)))
-                (response/unauthorized
-                  {:message "Incorrect login or password"})))}}]
+            (fn [request]
+              (let [login (-> request :body-params :login)
+                    password (-> request :body-params :password)
+                    session (-> request :session)]
+                (if-some [user (auth/authenticate-user login password)]
+                  (-> (response/ok {:identity user})
+                      (assoc :session (assoc session :identity user)))
+                  (response/unauthorized
+                    {:message "Incorrect login or password"}))))}}]
    ["/logout"
     {:post {:responses {200 {:body {:message string?}}}
             :handler (fn [_] (response/ok {:message "Logout successful."}))}}]
@@ -90,11 +98,12 @@
    ["/session"
     {:get {:responses {200 {:body {:session {:identity (data-spec/maybe {:login string?})}}}}
            :handler
-           (fn [{{:keys [identity]} :session}]
+           (fn [request]
+             (pprint (:session request))
              (response/ok {:session
                            {:identity
                             (not-empty
-                              (select-keys identity [:login :created-at]))}}))}}]
+                              (select-keys {} [:login :created-at]))}}))}}]
    ["/messages"
     {:get
      {:responses
